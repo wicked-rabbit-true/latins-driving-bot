@@ -1,6 +1,6 @@
 [build]
 # Only build the API server (WhatsApp bot), skip UI components
-buildCommand = "cd artifacts/api-server && pnpm run build"
+buildCommand = "cd artifacts/api-server && pnpm install --no-frozen-lockfile && pnpm run build"
 
 [start]
 # Start the WhatsApp bot directly
@@ -10,5 +10,6 @@ startCommand = "cd artifacts/api-server && node dist/index.mjs"
 # Environment variables for Railway
 [deploy.variables]
 NODE_ENV = "production"
-NIXPACKS_BUILD_CMD = "cd artifacts/api-server && pnpm run build"
+NIXPACKS_BUILD_CMD = "cd artifacts/api-server && pnpm install --no-frozen-lockfile && pnpm run build"
 NIXPACKS_START_CMD = "cd artifacts/api-server && node dist/index.mjs"
+NIXPACKS_INSTALL_CMD = "pnpm install --no-frozen-lockfile"

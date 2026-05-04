@@ -1,0 +1,15 @@
+# Simplified Railway configuration for WhatsApp bot only
+
+[build]
+buildCommand = "cd artifacts/api-server && npm install && npm run build"
+
+[start]
+startCommand = "cd artifacts/api-server && node dist/index.mjs"
+
+# Force Railway to only deploy the API server
+[deploy]
+[deploy.variables]
+NODE_ENV = "production"
+NIXPACKS_NODE_VERSION = "20"
+NIXPACKS_BUILD_CMD = "cd artifacts/api-server && npm install && npm run build"
+NIXPACKS_START_CMD = "cd artifacts/api-server && node dist/index.mjs"

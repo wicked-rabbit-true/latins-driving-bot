@@ -1,0 +1,27 @@
+# Ignore all workspace packages except api-server for Railway deployment
+artifacts/admin
+artifacts/exam
+artifacts/mockup-sandbox
+lib/api-client-react
+lib/object-storage-web
+lib/integrations
+scripts
+attached_assets
+.git
+.gitignore
+.replit
+.replitignore
+README.md
+docs
+*.md
+.env.local
+.env.*.local
+node_modules
+dist
+build
+.cache
+**/__tests__
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts
