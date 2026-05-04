@@ -1,6 +1,6 @@
 [build]
-# Only build the API server (WhatsApp bot), skip UI components
-buildCommand = "cd artifacts/api-server && pnpm install --no-frozen-lockfile && pnpm run build"
+# Force Railway to use npm and bypass workspace completely
+buildCommand = "cd artifacts/api-server && npm install && npm run build"
 
 [start]
 # Start the WhatsApp bot directly
@@ -10,6 +10,8 @@ startCommand = "cd artifacts/api-server && node dist/index.mjs"
 # Environment variables for Railway
 [deploy.variables]
 NODE_ENV = "production"
-NIXPACKS_BUILD_CMD = "cd artifacts/api-server && pnpm install --no-frozen-lockfile && pnpm run build"
+NIXPACKS_NODE_VERSION = "20"
+NIXPACKS_PACKAGE_MANAGER = "npm"
+NIXPACKS_BUILD_CMD = "cd artifacts/api-server && npm install && npm run build"
 NIXPACKS_START_CMD = "cd artifacts/api-server && node dist/index.mjs"
-NIXPACKS_INSTALL_CMD = "pnpm install --no-frozen-lockfile"
+NIXPACKS_INSTALL_CMD = "npm install"
