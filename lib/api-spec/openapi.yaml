@@ -1,0 +1,965 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: students
+    description: Student management
+  - name: language-cache
+    description: Language cache diagnostics
+  - name: prospects
+    description: Prospects (contacts with a detected language that are not students)
+  - name: exam
+    description: Exam question bank management and practice sessions
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /students:
+    get:
+      operationId: listStudents
+      tags: [students]
+      summary: List all students
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Search by name or phone
+        - in: query
+          name: lang
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+          description: Filter by preferred language code(s) (e.g. es, ur, en). Accepts multiple values.
+        - in: query
+          name: tsuruoka
+          schema:
+            type: boolean
+          description: If true, return only students who graduated from Tsuruoka.
+      responses:
+        "200":
+          description: List of students
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Student"
+    post:
+      operationId: createStudent
+      tags: [students]
+      summary: Create a new student
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "201":
+          description: Student created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "409":
+          description: Phone number already exists
+
+  /students/{id}:
+    get:
+      operationId: getStudent
+      tags: [students]
+      summary: Get a student by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Student found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "404":
+          description: Not found
+    put:
+      operationId: updateStudent
+      tags: [students]
+      summary: Update a student
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudentInput"
+      responses:
+        "200":
+          description: Updated student
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Student"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteStudent
+      tags: [students]
+      summary: Delete a student
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /students/{id}/sync-bookitit:
+    post:
+      operationId: syncStudentBookitit
+      tags: [students]
+      summary: Register or update student in Bookitit
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Sync result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BookititSyncResult"
+        "404":
+          description: Not found
+
+  /students/summary:
+    get:
+      operationId: getStudentsSummary
+      tags: [students]
+      summary: Summary stats (total, paid, pending)
+      responses:
+        "200":
+          description: Summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudentsSummary"
+
+  /language-cache/stats:
+    get:
+      operationId: getLanguageCacheStats
+      tags: [language-cache]
+      summary: Language cache size and last prune timestamp
+      responses:
+        "200":
+          description: Cache stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LanguageCacheStats"
+
+  /language-cache/prune:
+    post:
+      operationId: pruneLanguageCache
+      tags: [language-cache]
+      summary: Manually prune stale language cache entries
+      responses:
+        "200":
+          description: Prune completed — removed count reflects bot execution
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LanguageCachePruneResult"
+        "202":
+          description: Prune queued — bot was not responding; action executes on next startup
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LanguageCachePruneResult"
+
+  /language-cache/prune-status:
+    get:
+      operationId: getLanguageCachePruneStatus
+      tags: [language-cache]
+      summary: Check whether a prune action is still queued (bot offline)
+      responses:
+        "200":
+          description: Prune queue status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LanguageCachePruneStatus"
+
+  /language-cache/prune-history:
+    get:
+      operationId: getLanguageCachePruneHistory
+      tags: [language-cache]
+      summary: Recent prune history with malformed-key counts
+      responses:
+        "200":
+          description: List of prune log entries (most recent first, up to 50)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LanguageCachePruneLogEntry"
+
+  # ─── EXAM ────────────────────────────────────────────────────────────────────
+
+  /exam/questions:
+    get:
+      operationId: listExamQuestions
+      tags: [exam]
+      summary: List exam questions (admin)
+      parameters:
+        - in: query
+          name: nivel
+          schema: { type: integer }
+          description: Filter by level (1=home, 2=office)
+        - in: query
+          name: revisado
+          schema: { type: boolean }
+          description: Filter by reviewed status
+        - in: query
+          name: ciudad
+          schema: { type: string }
+          description: Filter by city (Saitama, Tochigi, Chiba, Tokyo, Kanagawa, Nagoya, Osaka)
+        - in: query
+          name: examenNumero
+          schema: { type: integer }
+          description: Filter by exam number (1, 2, 3...)
+        - in: query
+          name: q
+          schema: { type: string }
+          description: Search text
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50 }
+        - in: query
+          name: offset
+          schema: { type: integer, default: 0 }
+      responses:
+        "200":
+          description: List of exam questions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamQuestionsList"
+    post:
+      operationId: createExamQuestion
+      tags: [exam]
+      summary: Add a question to the bank
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamQuestionInput"
+      responses:
+        "201":
+          description: Question created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamQuestion"
+
+  /exam/questions/analyze:
+    post:
+      operationId: analyzeExamQuestion
+      tags: [exam]
+      summary: Analyze a question with GPT + knowledge base (admin tool)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeQuestionInput"
+      responses:
+        "200":
+          description: Analysis result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnalyzeQuestionResult"
+
+  /exam/questions/analyze-batch:
+    post:
+      operationId: analyzeBatchExamQuestions
+      tags: [exam]
+      summary: Analyze multiple questions at once (admin tool)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnalyzeBatchInput"
+      responses:
+        "200":
+          description: Batch analysis results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resultados:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/AnalyzeQuestionResult"
+                required: [resultados]
+
+  /exam/questions/{id}:
+    get:
+      operationId: getExamQuestion
+      tags: [exam]
+      summary: Get a question by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamQuestion"
+        "404":
+          description: Not found
+    put:
+      operationId: updateExamQuestion
+      tags: [exam]
+      summary: Update a question
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamQuestionPatch"
+      responses:
+        "200":
+          description: Updated question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamQuestion"
+        "404":
+          description: Not found
+    delete:
+      operationId: deleteExamQuestion
+      tags: [exam]
+      summary: Delete a question
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+
+  /exam/sessions:
+    post:
+      operationId: createExamSession
+      tags: [exam]
+      summary: Start a practice exam session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamSessionInput"
+      responses:
+        "201":
+          description: Session started with first question
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSessionStart"
+
+  /exam/sessions/{id}:
+    get:
+      operationId: getExamSession
+      tags: [exam]
+      summary: Get session state
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Session state
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSession"
+        "404":
+          description: Not found
+
+  /exam/sessions/{id}/answer:
+    post:
+      operationId: answerExamQuestion
+      tags: [exam]
+      summary: Submit answer and get feedback + next question
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamAnswerInput"
+      responses:
+        "200":
+          description: Feedback and next question (or end of exam)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamAnswerResult"
+        "404":
+          description: Session not found
+
+  /exam/stats:
+    get:
+      operationId: getExamStats
+      tags: [exam]
+      summary: Admin stats — question bank counts
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamStats"
+
+  /prospects:
+    get:
+      operationId: listProspects
+      tags: [prospects]
+      summary: List contacts with a detected language that are not registered students
+      parameters:
+        - in: query
+          name: lang
+          schema:
+            type: array
+            items:
+              type: string
+          explode: true
+          description: Filter by language code(s) (e.g. es, ur, en). Accepts multiple values.
+        - in: query
+          name: q
+          schema:
+            type: string
+          description: Filter by partial phone number
+      responses:
+        "200":
+          description: List of prospects
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProspectsList"
+
+  /api/storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      summary: Request a presigned upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StorageUploadRequest"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StorageUploadResponse"
+
+components:
+  schemas:
+    StorageUploadRequest:
+      type: object
+      properties:
+        name:        { type: string }
+        size:        { type: integer }
+        contentType: { type: string }
+      required:
+        - name
+        - size
+        - contentType
+
+    StorageUploadResponse:
+      type: object
+      properties:
+        uploadURL:   { type: string }
+        objectPath:  { type: string }
+      required:
+        - uploadURL
+        - objectPath
+
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Student:
+      type: object
+      properties:
+        id:                    { type: integer }
+        codigoAlumno:          { type: string, nullable: true }
+        nombre:                { type: string }
+        telefono:              { type: string }
+        email:                 { type: string, nullable: true }
+        sexo:                  { type: string, nullable: true }
+        fechaNacimiento:       { type: string, format: date, nullable: true }
+        direccion:             { type: string, nullable: true }
+        codigoPostal:          { type: string, nullable: true }
+        tipoLicencia:          { type: string, nullable: true }
+        expiracionVisa:        { type: string, format: date, nullable: true }
+        valorCurso:            { type: integer, nullable: true }
+        montoPagado:           { type: integer, nullable: true }
+        montoRestante:         { type: integer, nullable: true }
+        bookititId:            { type: string, nullable: true }
+        notas:                 { type: string, nullable: true }
+        fechaInscripcion:      { type: string, format: date, nullable: true }
+        prefectura:            { type: string, nullable: true }
+        examen50Estado:        { type: string, nullable: true }
+        internadoFechaInicio:  { type: string, format: date, nullable: true }
+        internadoFechaFin:     { type: string, format: date, nullable: true }
+        examen100Estado:       { type: string, nullable: true }
+        examen100Departamento: { type: string, nullable: true }
+        pagoEstado:            { type: string, nullable: true }
+        igtUsername:           { type: string, nullable: true }
+        igtPassword:           { type: string, nullable: true }
+        igtExpiresAt:          { type: string, format: date-time, nullable: true }
+        igtExamType:           { type: string, nullable: true }
+        igtExamType2:          { type: string, nullable: true }
+        preferredLanguage:     { type: string, nullable: true }
+        tsuruokaGraduado:      { type: boolean, nullable: true }
+        tsuruokaFechaGraduacion: { type: string, format: date, nullable: true }
+        createdAt:             { type: string, format: date-time, nullable: true }
+        updatedAt:             { type: string, format: date-time, nullable: true }
+      required:
+        - id
+        - nombre
+        - telefono
+
+    StudentInput:
+      type: object
+      properties:
+        nombre:                { type: string }
+        telefono:              { type: string }
+        email:                 { type: string, nullable: true }
+        sexo:                  { type: string, nullable: true }
+        fechaNacimiento:       { type: string, format: date, nullable: true }
+        direccion:             { type: string, nullable: true }
+        codigoPostal:          { type: string, nullable: true }
+        tipoLicencia:          { type: string, nullable: true }
+        expiracionVisa:        { type: string, format: date, nullable: true }
+        valorCurso:            { type: integer, nullable: true }
+        montoPagado:           { type: integer, nullable: true }
+        notas:                 { type: string, nullable: true }
+        fechaInscripcion:      { type: string, format: date, nullable: true }
+        prefectura:            { type: string, nullable: true }
+        examen50Estado:        { type: string, nullable: true }
+        internadoFechaInicio:  { type: string, format: date, nullable: true }
+        internadoFechaFin:     { type: string, format: date, nullable: true }
+        examen100Estado:       { type: string, nullable: true }
+        examen100Departamento: { type: string, nullable: true }
+        pagoEstado:            { type: string, nullable: true }
+        preferredLanguage:     { type: string, nullable: true }
+      required:
+        - nombre
+        - telefono
+
+    BookititSyncResult:
+      type: object
+      properties:
+        success:    { type: boolean }
+        bookititId: { type: string, nullable: true }
+        message:    { type: string }
+      required:
+        - success
+        - message
+
+    StudentsSummary:
+      type: object
+      properties:
+        total:          { type: integer }
+        totalValor:     { type: integer }
+        totalPagado:    { type: integer }
+        totalRestante:  { type: integer }
+        sinBookitit:    { type: integer }
+      required:
+        - total
+        - totalValor
+        - totalPagado
+        - totalRestante
+        - sinBookitit
+
+    LanguageCacheStats:
+      type: object
+      properties:
+        entryCount:          { type: integer }
+        uniqueUserCount:     { type: integer }
+        groupCount:          { type: integer }
+        lastPruneAt:         { type: string, format: date-time, nullable: true }
+        lastPruneMalformed:  { type: integer, nullable: true }
+        byLanguage:
+          type: object
+          additionalProperties:
+            type: integer
+        byLanguageGroups:
+          type: object
+          additionalProperties:
+            type: integer
+      required:
+        - entryCount
+        - uniqueUserCount
+        - groupCount
+        - byLanguage
+        - byLanguageGroups
+
+    LanguageCachePruneResult:
+      type: object
+      properties:
+        removed:   { type: integer }
+        malformed: { type: integer, nullable: true }
+        pending:   { type: boolean, nullable: true }
+      required:
+        - removed
+
+    LanguageCachePruneStatus:
+      type: object
+      properties:
+        pending:    { type: boolean }
+        lastStatus: { type: string, nullable: true }
+      required:
+        - pending
+
+    LanguageCachePruneLogEntry:
+      type: object
+      properties:
+        id:        { type: integer }
+        prunedAt:  { type: string, format: date-time }
+        removed:   { type: integer }
+        malformed: { type: integer }
+      required:
+        - id
+        - prunedAt
+        - removed
+        - malformed
+
+    Prospect:
+      type: object
+      properties:
+        phone:     { type: string }
+        lang:      { type: string }
+        updatedAt: { type: string, format: date-time, nullable: true }
+      required:
+        - phone
+        - lang
+
+    ExamQuestion:
+      type: object
+      properties:
+        id:                 { type: integer }
+        pregunta:           { type: string }
+        respuesta:          { type: boolean }
+        explicacion:        { type: string, nullable: true }
+        nivel:              { type: integer }
+        ciudad:             { type: string, nullable: true }
+        imagenUrl:          { type: string, nullable: true }
+        imagenesUrls:
+          type: array
+          nullable: true
+          items: { type: string }
+        imagenDescripcion:  { type: string, nullable: true, description: "Descripción textual de la(s) imagen(es) para ayudar a la IA a interpretarlas" }
+        examenNumero:       { type: integer, nullable: true, description: "Número de examen (1, 2, 3...)" }
+        fuente:             { type: string, nullable: true }
+        revisado:           { type: boolean }
+        vecesUsada:         { type: integer }
+        vecesCorrecta:      { type: integer }
+        createdAt:          { type: string, format: date-time, nullable: true }
+        updatedAt:          { type: string, format: date-time, nullable: true }
+      required:
+        - id
+        - pregunta
+        - respuesta
+        - nivel
+        - revisado
+
+    ExamQuestionInput:
+      type: object
+      properties:
+        pregunta:            { type: string }
+        respuesta:           { type: boolean }
+        explicacion:         { type: string, nullable: true }
+        nivel:               { type: integer, default: 2 }
+        ciudad:              { type: string, nullable: true }
+        imagenUrl:           { type: string, nullable: true }
+        imagenesUrls:
+          type: array
+          nullable: true
+          items: { type: string }
+        imagenDescripcion:   { type: string, nullable: true }
+        examenNumero:        { type: integer, nullable: true }
+        fuente:              { type: string, nullable: true }
+        revisado:            { type: boolean, default: false }
+      required:
+        - pregunta
+        - respuesta
+
+    ExamQuestionPatch:
+      type: object
+      properties:
+        pregunta:            { type: string }
+        respuesta:           { type: boolean }
+        explicacion:         { type: string, nullable: true }
+        nivel:               { type: integer }
+        ciudad:              { type: string, nullable: true }
+        imagenUrl:           { type: string, nullable: true }
+        imagenesUrls:
+          type: array
+          nullable: true
+          items: { type: string }
+        imagenDescripcion:   { type: string, nullable: true }
+        examenNumero:        { type: integer, nullable: true }
+        fuente:              { type: string, nullable: true }
+        revisado:            { type: boolean }
+
+    ExamQuestionsList:
+      type: object
+      properties:
+        total:  { type: integer }
+        offset: { type: integer }
+        limit:  { type: integer }
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ExamQuestion"
+      required:
+        - total
+        - offset
+        - limit
+        - items
+
+    AnalyzeBatchInput:
+      type: object
+      properties:
+        preguntas:
+          type: array
+          items: { type: string }
+          maxItems: 50
+        nivel:      { type: integer, default: 1 }
+        ciudad:     { type: string, nullable: true }
+        guardar:    { type: boolean, default: false }
+        imagenUrl:  { type: string, nullable: true, description: "objectPath de imagen de figura para preguntas visuales" }
+      required:
+        - preguntas
+
+    AnalyzeQuestionInput:
+      type: object
+      properties:
+        pregunta:    { type: string }
+        nivel:       { type: integer, default: 1 }
+        ciudad:      { type: string, nullable: true }
+        guardar:     { type: boolean, default: false }
+        imagenUrl:   { type: string, nullable: true }
+      required:
+        - pregunta
+
+    AnalyzeQuestionResult:
+      type: object
+      properties:
+        pregunta:      { type: string }
+        respuesta:     { type: boolean }
+        explicacion:   { type: string }
+        referencia:    { type: string, nullable: true, description: "Cita exacta del libro en japonés usada para la respuesta" }
+        confianza:     { type: string, enum: [alta, media, baja] }
+        advertencia:   { type: string, nullable: true }
+        fuentes:
+          type: array
+          items: { type: string }
+        guardado:      { type: boolean }
+        questionId:    { type: integer, nullable: true }
+      required:
+        - pregunta
+        - respuesta
+        - explicacion
+        - confianza
+        - fuentes
+        - guardado
+
+    ExamSessionInput:
+      type: object
+      properties:
+        nivel:         { type: integer }
+        ciudad:        { type: string, nullable: true }
+        examenNumero:  { type: integer, nullable: true, description: "Número de examen específico (1, 2, 3...). Si es null, se mezclan preguntas al azar." }
+        participante:  { type: string, nullable: true }
+      required:
+        - nivel
+
+    ExamSessionStart:
+      type: object
+      properties:
+        sessionId:      { type: integer }
+        nivel:          { type: integer }
+        ciudad:         { type: string, nullable: true }
+        totalPreguntas: { type: integer }
+        preguntaActual:
+          $ref: "#/components/schemas/ExamSessionQuestion"
+      required:
+        - sessionId
+        - nivel
+        - totalPreguntas
+        - preguntaActual
+
+    ExamSession:
+      type: object
+      properties:
+        id:             { type: integer }
+        nivel:          { type: integer }
+        ciudad:         { type: string, nullable: true }
+        participante:   { type: string, nullable: true }
+        estado:         { type: string }
+        totalPreguntas: { type: integer }
+        respondidas:    { type: integer }
+        correctas:      { type: integer }
+        porcentaje:     { type: number, nullable: true }
+        createdAt:      { type: string, format: date-time, nullable: true }
+        finishedAt:     { type: string, format: date-time, nullable: true }
+      required:
+        - id
+        - nivel
+        - estado
+        - totalPreguntas
+        - respondidas
+        - correctas
+
+    ExamSessionQuestion:
+      type: object
+      properties:
+        numero:   { type: integer }
+        pregunta: { type: string }
+      required:
+        - numero
+        - pregunta
+
+    ExamAnswerInput:
+      type: object
+      properties:
+        respuesta: { type: boolean }
+      required:
+        - respuesta
+
+    ExamAnswerResult:
+      type: object
+      properties:
+        correcto:       { type: boolean }
+        respuestaCorrecta: { type: boolean }
+        explicacion:    { type: string }
+        correctas:      { type: integer }
+        respondidas:    { type: integer }
+        terminado:      { type: boolean }
+        porcentajeFinal: { type: number, nullable: true }
+        siguientePregunta:
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ExamSessionQuestion"
+      required:
+        - correcto
+        - respuestaCorrecta
+        - explicacion
+        - correctas
+        - respondidas
+        - terminado
+
+    ExamStats:
+      type: object
+      properties:
+        totalPreguntas:    { type: integer }
+        nivel1:            { type: integer }
+        nivel2:            { type: integer }
+        revisadas:         { type: integer }
+        pendientesRevision: { type: integer }
+        porCiudad:
+          type: object
+          additionalProperties: { type: integer }
+      required:
+        - totalPreguntas
+        - nivel1
+        - nivel2
+        - revisadas
+        - pendientesRevision
+        - porCiudad
+
+    ProspectsList:
+      type: object
+      properties:
+        total:      { type: integer }
+        byLanguage:
+          type: object
+          additionalProperties:
+            type: integer
+        prospects:
+          type: array
+          items:
+            $ref: "#/components/schemas/Prospect"
+      required:
+        - total
+        - byLanguage
+        - prospects

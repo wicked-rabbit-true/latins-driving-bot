@@ -1,0 +1,29 @@
+Cuando un prospecto es reconocido y pide informacion relacionada a la licencia de conducir , el bot tiene que pedir los siguientes datos : 
+
+1.- país
+2.- edad 
+3.- Lugar en Japón donde reside
+4.- Que tipo de licencia pretende obtener en Japón
+5.- Cuanto porcentaje de idioma japones entiende 
+6.- Hombre o mujer
+7.- Si tiene visa vigente en Japon
+
+Con esos datos el bot puede dar información mas precisa …
+Por ejemplo, si la persona indica su país , el bot ya sabe que idioma utilizar 
+El lugar donde la persona reside nos va dar la noción de recomendarle el cambio de dirección para el  ultimo examen de 100 preguntas , si la persona reside en estas ciudades : TOCHIGI y CHIBA si aplican para licencia regular automática , manual o licencia de 3 toneladas, NO necesitan cambiar de dirección , SI la persona reside en Saitama y aplica para Licencia de 3 toneladas tampoco necesita cambiar de dirección para el examen de 100 preguntas . 
+Que tipo de licencia piensa obtener nos dará la idea de la información precisa que se le dará al prospecto . No necesitamos dar información a un prospecto que desea obtener licencia de 3 toneladas , sobre licencia automática o manual , por ejemplo.
+Sobre el porcentaje de japones que la persona domine , si esta menos del 30% , el bot tiene que indicarle que en Japón es esencial entender un poco el nivel de japones, mas aun si piensa dirigir vehículos por las rutas de Japón, en caso tuviera algún accidente … Hace la recomendación e indica que tiene que saber por lo menos los números y derecha, izquierda , ya que es fundamental entender esas instrucciones para que los instructores puedan ensenharle a conducir sin problemas. Solo le haces esa recomendación y luego indicas que nuestra escuela se especializa en alumnos extranjeros , ambiente predominante extranjeros de diversas nacionalidades . Pero es bueno aprender un poco del idioma.
+Si es hombre o mujer es importante también porque nuestra escuela internado separa zona de hombres con la de mujeres . Las mujeres se hospedan en departamentos exclusivos para mujeres . 
+Y si tiene visa podemos seguir con la explicación ,  si no cuenta con una visa vigente , con Zairyu card y Juminhyou , no es posible aplicar para obtener licencia de conducir .
+Si la persona menciona tiene licencia de su país y desea hacer el canje , entonces el bot tiene que indicar que el proceso de canje de licencia actualmente es muy prolongado y estricto. Lo recomendable es aplicar a la licencia desde 0 , en nuestros planes el alumno puede obtener su licencia hasta en un mes . 
+Si la persona solo desea aprobar el examen de 50 preguntas y de 100 , se le da los precios solo para ese curso . 
+Con esos datos , vamos construyendo el perfil del prospecto . Para saber exactamente que información entregarle.
+
+Entonces , supongamos el prospecto se comunica por primera vez, le damos el mensaje de bienvenida , si el bot puede detectar el idioma en que esta escribiendo , quizá es mejor continuar la comunicación en ese idioma , y preguntar si prefiere atención en otro idioma … El idioma base que se debe utilizar si el bot no detecta el idioma usado , es el ingles . 
+Luego del mensaje de bienvenida y de saber el idioma , entonces el prospecto ingresa a preguntar los datos mencionados con el único fin de entregar una mejor información al alumno . 
+
+Si en cualquiera de los datos el bot tiene alguna duda , puede consultar con Carlos por interno y luego de liberar las dudas continuar dando la explicación al prospecto . 
+Veo que el bot esta soltando toda la información en un solo mensaje y en ese mismo mensaje solicitando a las personas vayan a nuestra oficina para su registro . Eso se nota muy inducido . El trato debe ser mas personalizado … 
+
+Si el prospecto esta de acuerdo e indica cuando puede ir a nuestras oficinas a realizar la inscripción o registro , el bot procede a ver la zona donde reside ( pidió ese dato antes ) y según eso sugiere una oficina mas cercana ( la de Saitama o Tochigi ) de acuerdo a los horarios de atendimiento que el bot ya tiene . 
+Los días y horas para agendar una cita en nuestras oficinas de saitama pueden ser de lunes a viernes desde las 13 pm hasta las 17 pm y sábados y domingos de 12 pm a 15 pm , el bot debe primero confirmar el horario con la agenda bookitit para ver si puede integrar a ese prospecto , por ejemplo … si hay un contrato nuevo el lunes a las 13 pm en nuestra agenda, el bot puede utilizar ese mismo día y hora para agendar a mas contraos nuevos que deseen venir . SI ya hay alguien agendado a esa hora el bot no necesita consultar con Carlos , pero si no hay nadie agendado , el bot tiene que consultar con Carlos antes de agendar la cita . EN la oficina de Tochigi puede generar citas sábados y domingos de 17 pm a 19 pm , no necesita confirmar con Carlos ya que esos días Carlos esta siempre en nuestra oficina en Tochigi . 

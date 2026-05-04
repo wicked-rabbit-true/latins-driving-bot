@@ -1,0 +1,30 @@
+1. El Desglose de la Norma (Evitación de Colisiones)
+La situación: Peligro inminente de colisión frontal con tráfico en sentido contrario.
+
+La acción técnica: Frenar a fondo (apply the pedal) y girar hacia la izquierda (steer to the left).
+
+La instrucción psicológica: No rendirse ni "cerrar los ojos" hasta el último momento.
+
+2. La Regla Técnica de Japón
+El manual oficial de conductores de la Agencia Nacional de Policía de Japón establece un protocolo específico para colisiones frontales inminentes:
+
+Girar a la izquierda: En Japón se conduce por la izquierda. Girar hacia ese lado es la única forma de alejarse del flujo de tráfico que viene de frente. Girar a la derecha te pondría directamente en la trayectoria del otro vehículo o en el carril contrario de forma más peligrosa.
+
+Reducir la energía: Frenar violentamente busca reducir la energía cinética del impacto. Cada kilómetro por hora que logres restar a la velocidad antes del choque puede ser la diferencia entre la vida y la muerte.
+
+Control del vehículo: La frase "No dar por perdida la esperanza" (Do not give up hope) es un término técnico en los manuales japoneses para evitar el "bloqueo" del conductor. Si el conductor se rinde y suelta el volante o cierra los ojos, pierde la capacidad de realizar una maniobra evasiva de último segundo que podría transformar un choque frontal mortal en un roce lateral menos grave.
+
+3. Lógica de Entrenamiento para el Bot
+Para tus pruebas de digitalización en Saitama, configura este razonamiento:
+
+Punto Crítico: Dirección de evasión en choque frontal.
+
+Dirección obligatoria: Siempre hacia la IZQUIERDA (hacia el arcén o fuera de la carretera si es necesario).
+
+Acción del pedal: Frenado de emergencia máximo.
+
+Validación de la frase: La instrucción de "mantener la esperanza" es una parte oficial del currículo de seguridad vial japonés para fomentar la acción evasiva continua.
+
+Resultado: VERDADERO.
+
+Nota para el bot: "En cualquier pregunta sobre evitar accidentes frontales, si la opción sugiere girar a la derecha, es Falsa. La regla de oro en Japón es: Frenar y hacia la izquierda".

@@ -1,0 +1,39 @@
+Actúa como un desarrollador Senior de Node.js. Quiero construir un Asistente Inteligente de WhatsApp para mi escuela de manejo 'Latin's Driving Support' con las siguientes especificaciones:
+
+Tecnología de Conexión:
+
+Usa la librería whatsapp-web.js con qrcode-terminal para el emparejamiento.
+
+Configura la persistencia de sesión usando LocalAuth para evitar re-escanear el QR constantemente.
+
+Configura Puppeteer con los argumentos necesarios (--no-sandbox, --disable-setuid-sandbox) para que funcione correctamente en el entorno de Replit.
+
+Cerebro de Inteligencia Artificial (OpenAI):
+
+Utiliza la API de OpenAI con el modelo 'gpt-4o'.
+
+El 'System Prompt' debe ser el contenido íntegro de mi Manual Operativo de Latin's Driving Support (subiré el archivo como manual.txt).
+
+La IA debe actuar como el asistente experto de la escuela, atendiendo tanto a interesados como a alumnos actuales.
+
+Lógica de Filtrado Inteligente (CRÍTICO):
+
+Filtro por Intención: El bot NO debe responder a todos los mensajes. Solo debe activarse si detecta que el mensaje está relacionado con: licencias de conducir (AT, MT, 3 Ton), precios, procesos de internado en Yamagata, trámites de Menkyo, requisitos de visa o soporte para exámenes.
+
+Privacidad Personal: Si el mensaje es de carácter personal (familia, amigos, temas sociales no comerciales), la IA debe ignorarlo completamente. GPT-4o debe discernir entre una consulta de negocio y una charla privada.
+
+Capacidad Multilingüe:
+
+El bot debe detectar automáticamente el idioma del usuario (Urdu, Nepalí, Turco, Inglés, Portugués, etc.) y responder en ese mismo idioma con fluidez natural, basándose siempre en la información oficial del manual en español.
+
+Reglas de Negocio:
+
+Si el usuario pide hablar con una persona, pregunta por 'Licencia de 4 toneladas (Chugata)' o si el bot no conoce la respuesta, debe decir: 'Carlos se comunicará contigo pronto para darte soporte personalizado' y dejar de responder automáticamente en ese chat.
+
+Los precios son FIJOS. No debe ofrecer descuentos bajo ninguna circunstancia.
+
+Estructura del Proyecto:
+
+Crea un archivo index.js principal.
+
+Crea un archivo manual.txt donde pegaré toda la información de la escuela.

@@ -1,0 +1,142 @@
+modules = ["nodejs-24", "python-3.11", "postgresql-16"]
+
+[deployment]
+router = "application"
+deploymentTarget = "autoscale"
+
+[deployment.postBuild]
+args = ["pnpm", "store", "prune"]
+env = { "CI" = "true" }
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "WhatsApp Bot - Latin's Driving Support"
+mode = "sequential"
+author = "agent"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "sh -c 'while true; do find /home/runner/.wwebjs_auth/session -name \"SingletonLock\" -o -name \"SingletonCookie\" -o -name \"SingletonSocket\" 2>/dev/null | xargs rm -f 2>/dev/null; pnpm --filter @workspace/api-server run bot; echo \"Bot terminado, reiniciando en 2 min...\"; sleep 120; done'"
+
+[[workflows.workflow]]
+name = "artifacts/api-server: API Server"
+author = "agent"
+mode = "sequential"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+artifactId = "3B4_FFSkEVBkAeYMFRJ2e"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/api-server run dev"
+cwd = "./artifacts/api-server"
+waitForPort = 8080
+
+[workflows.workflow.tasks.env]
+PORT = "8080"
+
+[[workflows.workflow]]
+name = "artifacts/mockup-sandbox: Component Preview Server"
+author = "agent"
+mode = "sequential"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+artifactId = "XegfDyZt7HqfW2Bb8Ghoy"
+isCanvasWorkflow = true
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/mockup-sandbox run dev"
+cwd = "./artifacts/mockup-sandbox"
+waitForPort = 8081
+
+[workflows.workflow.tasks.env]
+PORT = "8081"
+BASE_PATH = "/__mockup"
+
+[[workflows.workflow]]
+name = "artifacts/admin: web"
+author = "agent"
+mode = "sequential"
+
+[workflows.workflow.metadata]
+outputType = "webview"
+artifactId = "artifacts/admin"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "pnpm --filter @workspace/admin run dev"
+cwd = "./artifacts/admin"
+waitForPort = 23744
+router = "path"
+
+[workflows.workflow.tasks.env]
+PORT = "23744"
+BASE_PATH = "/admin/"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "WhatsApp Bot - Latin's Driving Support"
+
+[agent]
+stack = "PNPM_WORKSPACE"
+expertMode = true
+integrations = ["onedrive:1.0.0"]
+
+[postMerge]
+path = "scripts/post-merge.sh"
+timeoutMs = 20000
+
+[[ports]]
+localPort = 8080
+externalPort = 8080
+
+[[ports]]
+localPort = 8081
+externalPort = 80
+
+[[ports]]
+localPort = 8082
+externalPort = 3000
+
+[[ports]]
+localPort = 8083
+externalPort = 3001
+
+[[ports]]
+localPort = 21949
+externalPort = 3003
+
+[[ports]]
+localPort = 23744
+externalPort = 3002
+
+[nix]
+channel = "stable-25_05"
+
+[userenv]
+
+[userenv.shared]
+BOOKITIT_AGENDA_ID = "bkt43582"
+BOOKITIT_SERVICE_ID = "bkt112750"
+BOOKITIT_SERVICE_EXAM_ID = "bkt404668"
+BOOKITIT_SERVICE_KUMAGAYA_ID = "bkt684893"
+BOOKITIT_SERVICE_100TEST_ID = "bkt84260"
+BOOKITIT_AGENDA_MENKYO_ID = "bkt43956"
+BOOKITIT_SERVICE_50TEST_ID = "bkt84249"
+BOOKITIT_SERVICE_CAMPING_ID = "bkt404679"
+IGIVETEST_USERNAME = "lds"
+BOOKITIT_PUBLIC_KEY = "11e40ae635a921f05ec5fb696c87d883e"
+BOOKITIT_SERVICE_THEORIC_KONOSU_ID = "bkt83864"

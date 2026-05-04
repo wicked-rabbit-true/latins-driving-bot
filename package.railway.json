@@ -1,0 +1,17 @@
+{
+  "name": "latins-driving-bot-railway",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "cd artifacts/api-server && pnpm run build",
+    "start": "cd artifacts/api-server && node dist/index.mjs",
+    "bot": "cd artifacts/api-server && node src/whatsapp/bot.js"
+  },
+  "dependencies": {
+    "@workspace/api-server": "workspace:*"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

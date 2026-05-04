@@ -1,0 +1,40 @@
+# Ignore non-essential files for Railway deployment
+artifacts/admin
+artifacts/exam
+artifacts/mockup-sandbox
+attached_assets
+.git
+.gitignore
+.replit
+.replitignore
+README.md
+docs
+*.md
+.env.local
+.env.*.local
+
+# Ignore Python files (if any exist)
+*.py
+pyproject.toml
+requirements.txt
+Pipfile
+__pycache__/
+
+# Ignore build artifacts
+node_modules
+dist
+build
+.nuxt
+.next
+.cache
+
+# Ignore logs
+*.log
+logs
+
+# Ignore test files
+**/__tests__
+**/*.test.js
+**/*.test.ts
+**/*.spec.js
+**/*.spec.ts

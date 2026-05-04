@@ -1,0 +1,32 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "dIRzDDPR3Y4a0VRIYrGsq"
+uri = "file://LDS_Sistema_Documentacion.docx"
+type = "word_document"
+title = "Latin's Driving Support — Documentación del Sistema"
+
+[[outputs]]
+id = "Yd0747AkjUEgUsfhk6PsV"
+uri = "file://LDS_Manual_de_Usuario.docx"
+type = "word_document"
+title = "Latin's Driving Support — Manual de Usuario"
+
+[[outputs]]
+id = "peuW-M676aNqpOWm1ZgFZ"
+uri = "file://artifacts/api-server/src/whatsapp/manual.txt"
+type = "text"
+title = "Manual operativo del bot (manual.txt)"
+
+[[outputs]]
+id = "jTA0Q3-16-K9Z3i989QAr"
+uri = "file://prompt_principal.txt"
+type = "text"
+title = "Reglas de comportamiento del bot (SYSTEM_PROMPT)"
+
+[[outputs]]
+id = "jtxxg_AG-BtPFCfeZNmaJ"
+uri = "file://attached_assets/preguntas_confusas_extraidas.txt"
+type = "text"
+title = "Preguntas confusas extraídas del PDF (167 preguntas)"
